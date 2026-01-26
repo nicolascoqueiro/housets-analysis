@@ -20,30 +20,7 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 ---
 
 ## 📁 Estrutura de Pastas do Projeto
-
-# 🏠 Projeto: Análise do Mercado Imobiliário com Arquitetura de Medalhão
-
-Este repositório apresenta um projeto completo de **engenharia e análise de dados** aplicado ao mercado imobiliário, utilizando uma base pública do Kaggle.  
-O projeto cobre desde a ingestão de dados brutos até a **modelagem dimensional (Data Warehouse)** e a criação de **consultas analíticas avançadas**, seguindo uma **arquitetura de dados em medalhão (Raw → Silver → Gold)**.
-
-🔗 **Base de dados utilizada:**  
-https://www.kaggle.com/datasets/shengkunwang/housets-dataset
-
----
-
-## 🎯 Objetivos do Projeto
-
-- Implementar um pipeline de dados estruturado seguindo boas práticas de engenharia de dados  
-- Aplicar a arquitetura de medalhão em um contexto analítico real  
-- Realizar análises exploratórias e analíticas do mercado imobiliário  
-- Avaliar impactos de fatores socioeconômicos, infraestrutura e tempo nos preços dos imóveis  
-- Construir um **Data Warehouse** com modelo estrela  
-- Preparar dados e consultas para visualização em ferramentas de BI (Power BI)  
-
----
-
-## 📁 Estrutura de Pastas do Projeto
-'''
+```
 .
 ├── data_layer
 │ ├── raw
@@ -69,7 +46,7 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 ├── docker-compose.yml
 ├── requirements.txt
 └── README.md
-'''
+```
 
 
 ---
