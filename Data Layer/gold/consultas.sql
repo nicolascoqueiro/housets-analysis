@@ -101,30 +101,31 @@ GROUP BY l."CTY_FUL"
 ORDER BY percentual_acima_lista DESC;
 
 /* =========================================================
-   CONSULTA 5 - As 5 cidades com mais jovens e alto desemprego
+   CONSULTA 5- O mês com a maior média de preço para cada ano 
+   no período de 2019 a 2023 na cidade de Nova Iorque
    ========================================================= */
 
-WITH jovens_desemprego AS (
-    SELECT
-        l."CTY_FUL" AS cidade,
-        AVG(s."TOT_SCH_AGE") AS populacao_jovem,
-        AVG(s."UNE_POP")     AS populacao_desempregada
-    FROM dw.fat_houses f
-    JOIN dw.dim_local l
-        ON f."SRK_LOCAL" = l."SRK_LOCAL"
-    JOIN dw.dim_socio s
-        ON f."SRK_SOCIO" = s."SRK_SOCIO"
-    GROUP BY l."CTY_FUL"
-)
-SELECT
-    cidade,
-    ROUND(populacao_jovem::numeric, 0) AS populacao_jovem,
-    ROUND(populacao_desempregada::numeric, 0) AS populacao_desempregada
-FROM jovens_desemprego
-ORDER BY
-    populacao_jovem DESC,
-    populacao_desempregada DESC
-LIMIT 5;
+SELECT 
+    res.YEA, 
+    res.MON, 
+    res.CTY_FUL, 
+    res.preco_medio
+FROM (
+    SELECT 
+        t."YEA" AS YEA, 
+        t."MON" AS MON, 
+        l."CTY_FUL" AS CTY_FUL, 
+        MAX(ft."AVG_PRC") AS preco_medio,
+        RANK() OVER (PARTITION BY t."YEA" ORDER BY MAX(ft."AVG_PRC") DESC) AS rk
+    FROM dw.dim_local l   
+    JOIN dw.fat_houses ft ON l."SRK_LOCAL" = ft."SRK_LOCAL"
+    JOIN dw.dim_tempo t ON t."SRK_TEMPO" = ft."SRK_TEMPO"
+    WHERE l."CTY_FUL" ILIKE '%new york%' 
+      AND t."YEA" BETWEEN '2019' AND '2023'
+    GROUP BY t."YEA", t."MON", l."CTY_FUL"
+) AS res
+WHERE res.rk = 1
+ORDER BY res.YEA DESC;
 
 /* =========================================================
    CONSULTA 6 - As 5 cidades com maior volume
