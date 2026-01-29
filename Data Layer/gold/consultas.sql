@@ -6,9 +6,9 @@
 SELECT
     l."CTY_FUL" AS cidade,
     AVG(f."MED_HOM_VAL") AS preco_medio_imovel
-FROM dw.fat_houses f
-JOIN dw.dim_local l
-    ON f."SRK_LOCAL" = l."SRK_LOCAL"
+FROM dw.fat_hou f
+JOIN dw.dim_loc l
+    ON f."SRK_LOC" = l."SRK_LOC"
 GROUP BY l."CTY_FUL"
 ORDER BY preco_medio_imovel ASC
 LIMIT 5;
@@ -21,12 +21,13 @@ LIMIT 5;
 SELECT
     l."CTY_FUL" AS cidade,
     AVG(f."MED_HOM_VAL") AS preco_medio_imovel
-FROM dw.fat_houses f
-JOIN dw.dim_local l
-    ON f."SRK_LOCAL" = l."SRK_LOCAL"
+FROM dw.fat_hou f
+JOIN dw.dim_loc l
+    ON f."SRK_LOC" = l."SRK_LOC"
 GROUP BY l."CTY_FUL"
 ORDER BY preco_medio_imovel DESC
 LIMIT 5;
+
 
 /* =========================================================
    CONSULTA 3 - As 5 Cidades com melhor custo 
@@ -36,55 +37,25 @@ LIMIT 5;
 WITH infra_preco AS (
     SELECT
         l."CTY_FUL" AS cidade,
-
-        AVG(
-            i."BNK" +
-            i."BUS" +
-            i."HSP" +
-            i."MAL" +
-            i."PRK" +
-            i."RST" +
-            i."SCH" +
-            i."STN" +
-            i."SUP"
-        ) AS score_infraestrutura,
-
-        AVG(f."MED_HOM_VAL") AS preco_medio_imovel
-    FROM dw.fat_houses f
-    JOIN dw.dim_local l
-        ON f."SRK_LOCAL" = l."SRK_LOCAL"
-    JOIN dw.dim_infra i
-        ON f."SRK_INFRA" = i."SRK_INFRA"
+        AVG(i."BNK"+i."BUS"+i."HSP"+i."MAL"+i."PRK"+i."RST"+i."SCH"+i."STN"+i."SUP") AS score_infra,
+        AVG(f."MED_HOM_VAL") AS preco
+    FROM dw.fat_hou f
+    JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+    JOIN dw.dim_inf i ON f."SRK_INF" = i."SRK_INF"
     GROUP BY l."CTY_FUL"
-),
-indice AS (
-    SELECT
-        cidade,
-        score_infraestrutura,
-        preco_medio_imovel,
-        (score_infraestrutura / preco_medio_imovel) AS indice_bruto
-    FROM infra_preco
 ),
 normalizado AS (
     SELECT
         cidade,
-        score_infraestrutura,
-        preco_medio_imovel,
-        indice_bruto,
-        100 * (indice_bruto - MIN(indice_bruto) OVER ())
-        / NULLIF(
-            MAX(indice_bruto) OVER () - MIN(indice_bruto) OVER (),
-            0
-        ) AS indice_custo_beneficio
-    FROM indice
+        100 * (score_infra / NULLIF(preco,0))
+        / MAX(score_infra / NULLIF(preco,0)) OVER () AS indice
+    FROM infra_preco
 )
 SELECT
     cidade,
-    ROUND(score_infraestrutura::numeric, 2) AS score_infraestrutura,
-    ROUND(preco_medio_imovel::numeric, 2) AS preco_medio_imovel,
-    ROUND(indice_custo_beneficio::numeric, 2) AS indice_custo_beneficio
+    ROUND(indice::numeric,2) AS indice_custo_beneficio
 FROM normalizado
-ORDER BY indice_custo_beneficio DESC
+ORDER BY indice DESC
 LIMIT 5;
 
 /* =========================================================
@@ -93,39 +64,36 @@ LIMIT 5;
    ========================================================= */
 SELECT
     l."CTY_FUL" AS cidade,
-    AVG(f."SOL_ABV_LST") * 100 AS percentual_acima_lista
-FROM dw.fat_houses f
-JOIN dw.dim_local l
-    ON f."SRK_LOCAL" = l."SRK_LOCAL"
+    AVG(f."SOL_ABV_LST") * 100 AS percentual
+FROM dw.fat_hou f
+JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
 GROUP BY l."CTY_FUL"
-ORDER BY percentual_acima_lista DESC;
+ORDER BY percentual DESC;
+
 
 /* =========================================================
    CONSULTA 5- O mês com a maior média de preço para cada ano 
    no período de 2019 a 2023 na cidade de Nova Iorque
    ========================================================= */
 
-SELECT 
-    res.YEA, 
-    res.MON, 
-    res.CTY_FUL, 
-    res.preco_medio
+SELECT *
 FROM (
-    SELECT 
-        t."YEA" AS YEA, 
-        t."MON" AS MON, 
-        l."CTY_FUL" AS CTY_FUL, 
-        MAX(ft."AVG_PRC") AS preco_medio,
-        RANK() OVER (PARTITION BY t."YEA" ORDER BY MAX(ft."AVG_PRC") DESC) AS rk
-    FROM dw.dim_local l   
-    JOIN dw.fat_houses ft ON l."SRK_LOCAL" = ft."SRK_LOCAL"
-    JOIN dw.dim_tempo t ON t."SRK_TEMPO" = ft."SRK_TEMPO"
-    WHERE l."CTY_FUL" ILIKE '%new york%' 
-      AND t."YEA" BETWEEN '2019' AND '2023'
+    SELECT
+        t."YEA",
+        t."MON",
+        l."CTY_FUL",
+        AVG(f."AVG_PRC") AS preco,
+        RANK() OVER (PARTITION BY t."YEA" ORDER BY AVG(f."AVG_PRC") DESC) AS rk
+    FROM dw.fat_hou f
+    JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+    JOIN dw.dim_tmp t ON f."SRK_TMP" = t."SRK_TMP"
+    WHERE l."CTY_FUL" ILIKE '%new york%'
+      AND t."YEA" BETWEEN 2019 AND 2023
     GROUP BY t."YEA", t."MON", l."CTY_FUL"
-) AS res
-WHERE res.rk = 1
-ORDER BY res.YEA DESC;
+) x
+WHERE rk = 1
+ORDER BY "YEA" DESC;
+
 
 /* =========================================================
    CONSULTA 6 - As 5 cidades com maior volume
@@ -135,12 +103,12 @@ ORDER BY res.YEA DESC;
 SELECT
     l."CTY_FUL" AS cidade,
     SUM(f."HOM_SOL") AS total_vendas
-FROM dw.fat_houses f
-JOIN dw.dim_local l
-    ON f."SRK_LOCAL" = l."SRK_LOCAL"
+FROM dw.fat_hou f
+JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
 GROUP BY l."CTY_FUL"
 ORDER BY total_vendas DESC
 LIMIT 5;
+
 
 /* =========================================================
    CONSULTA 7 - As 5 cidades com maior renda média
@@ -149,143 +117,95 @@ LIMIT 5;
 SELECT
     l."CTY_FUL" AS cidade,
     AVG(s."PER_INC") AS renda_media
-FROM dw.fat_houses f
-JOIN dw.dim_local l
-    ON f."SRK_LOCAL" = l."SRK_LOCAL"
-JOIN dw.dim_socio s
-    ON f."SRK_SOCIO" = s."SRK_SOCIO"
+FROM dw.fat_hou f
+JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+JOIN dw.dim_soc s ON f."SRK_SOC" = s."SRK_SOC"
 GROUP BY l."CTY_FUL"
 ORDER BY renda_media DESC
 LIMIT 5;
+
 
 /* =========================================================
    CONSULTA 8 - Evolução do preço dos imóveis vs 
    infraestrutura ao longo do tempo
    ========================================================= */
-
-   WITH base_temporal AS (
+WITH base AS (
     SELECT
         t."YEA" AS ano,
         l."CTY_FUL" AS cidade,
-
-        AVG(f."MED_HOM_VAL") AS preco_medio_imovel,
-
-        AVG(
-            i."BNK" +
-            i."BUS" +
-            i."HSP" +
-            i."SCH" +
-            i."SUP"
-        ) AS score_infraestrutura
-    FROM dw.fat_houses f
-    JOIN dw.dim_tempo t
-        ON f."SRK_TEMPO" = t."SRK_TEMPO"
-    JOIN dw.dim_local l
-        ON f."SRK_LOCAL" = l."SRK_LOCAL"
-    JOIN dw.dim_socio s
-        ON f."SRK_SOCIO" = s."SRK_SOCIO"
-    JOIN dw.dim_infra i
-        ON f."SRK_INFRA" = i."SRK_INFRA"
-    GROUP BY
-        t."YEA",
-        l."CTY_FUL"
+        AVG(f."MED_HOM_VAL") AS preco,
+        AVG(i."BNK"+i."BUS"+i."HSP"+i."SCH"+i."SUP") AS infra
+    FROM dw.fat_hou f
+    JOIN dw.dim_tmp t ON f."SRK_TMP" = t."SRK_TMP"
+    JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+    JOIN dw.dim_inf i ON f."SRK_INF" = i."SRK_INF"
+    GROUP BY t."YEA", l."CTY_FUL"
 )
 SELECT
     ano,
     cidade,
-    ROUND(preco_medio_imovel::numeric, 2) AS preco_medio_imovel,
-    ROUND(score_infraestrutura::numeric, 2) AS score_infraestrutura
-FROM base_temporal
-ORDER BY ano, preco_medio_imovel DESC;
+    ROUND(preco::numeric,2) AS preco_medio,
+    ROUND(infra::numeric,2) AS score_infra
+FROM base
+ORDER BY ano, preco_medio DESC;
 
 /* =========================================================
    CONSULTA 9 - Eficiência urbana: cidades com boa 
    infraestrutura, renda média e baixo tempo de deslocamento
    ========================================================= */
-
-WITH indicadores_base AS (
+WITH base AS (
     SELECT
         l."CTY_FUL" AS cidade,
-
-        AVG(f."MED_HOM_VAL") AS preco_medio_imovel,
-        AVG(s."PER_INC") AS renda_media,
-        AVG(s."MED_COM_TIM") AS tempo_deslocamento,
-
-        AVG(
-            i."BNK" +
-            i."BUS" +
-            i."HSP" +
-            i."PRK" +
-            i."SCH" +
-            i."SUP"
-        ) AS score_infraestrutura
-    FROM dw.fat_houses f
-    JOIN dw.dim_tempo t
-        ON f."SRK_TEMPO" = t."SRK_TEMPO"
-    JOIN dw.dim_local l
-        ON f."SRK_LOCAL" = l."SRK_LOCAL"
-    JOIN dw.dim_socio s
-        ON f."SRK_SOCIO" = s."SRK_SOCIO"
-    JOIN dw.dim_infra i
-        ON f."SRK_INFRA" = i."SRK_INFRA"
+        AVG(f."MED_HOM_VAL") AS preco,
+        AVG(s."PER_INC") AS renda,
+        AVG(s."MED_COM_TIM") AS deslocamento,
+        AVG(i."BNK"+i."BUS"+i."HSP"+i."PRK"+i."SCH"+i."SUP") AS infra
+    FROM dw.fat_hou f
+    JOIN dw.dim_tmp t ON f."SRK_TMP" = t."SRK_TMP"
+    JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+    JOIN dw.dim_soc s ON f."SRK_SOC" = s."SRK_SOC"
+    JOIN dw.dim_inf i ON f."SRK_INF" = i."SRK_INF"
     GROUP BY l."CTY_FUL"
-),
-normalizacao AS (
-    SELECT
-        cidade,
-        preco_medio_imovel,
-        renda_media,
-        tempo_deslocamento,
-        score_infraestrutura,
-
-        /* quanto menor o preço e o deslocamento, melhor */
-        (score_infraestrutura / NULLIF(preco_medio_imovel, 0)) *
-        (renda_media / NULLIF(tempo_deslocamento, 0)) AS indice_eficiencia
-    FROM indicadores_base
 )
 SELECT
     cidade,
-    ROUND(preco_medio_imovel::numeric, 2) AS preco_medio_imovel,
-    ROUND(renda_media::numeric, 2) AS renda_media,
-    ROUND(tempo_deslocamento::numeric, 2) AS tempo_deslocamento,
-    ROUND(score_infraestrutura::numeric, 2) AS score_infraestrutura,
-    ROUND(indice_eficiencia::numeric, 6) AS indice_eficiencia_urbana
-FROM normalizacao
-ORDER BY indice_eficiencia_urbana DESC
+    ROUND((infra / preco) * (renda / deslocamento)::numeric,6) AS indice_eficiencia
+FROM base
+ORDER BY indice_eficiencia DESC
 LIMIT 10;
+
 
 /* =========================================================
    CONSULTA 10 - Pressão do mercado imobiliário por cidade
    ========================================================= */
-
 WITH base AS (
     SELECT
         l."CTY_FUL" AS cidade,
-        AVG(f."HOM_SOL")     AS vendas,
-        AVG(f."SOL_ABV_LST") AS acima_lista,
-        AVG(f."NEW_LST")     AS novos,
-        AVG(f."INV")         AS estoque,
-        AVG(s."PER_INC")     AS renda,
+        AVG(f."HOM_SOL") AS vendas,
+        AVG(f."SOL_ABV_LST") AS acima,
+        AVG(f."NEW_LST") AS novos,
+        AVG(f."INV") AS estoque,
+        AVG(s."PER_INC") AS renda,
         AVG(i."BNK"+i."BUS"+i."HSP"+i."MAL"+i."PRK"+i."SCH"+i."SUP") AS infra
-    FROM dw.fat_houses f
-    JOIN dw.dim_tempo t ON f."SRK_TEMPO" = t."SRK_TEMPO"
-    JOIN dw.dim_local l ON f."SRK_LOCAL" = l."SRK_LOCAL"
-    JOIN dw.dim_socio s ON f."SRK_SOCIO" = s."SRK_SOCIO"
-    JOIN dw.dim_infra i ON f."SRK_INFRA" = i."SRK_INFRA"
+    FROM dw.fat_hou f
+    JOIN dw.dim_tmp t ON f."SRK_TMP" = t."SRK_TMP"
+    JOIN dw.dim_loc l ON f."SRK_LOC" = l."SRK_LOC"
+    JOIN dw.dim_soc s ON f."SRK_SOC" = s."SRK_SOC"
+    JOIN dw.dim_inf i ON f."SRK_INF" = i."SRK_INF"
     GROUP BY l."CTY_FUL"
 )
 SELECT
     cidade,
-    ROUND((
+    ROUND(
         100 * (
-            (vendas - MIN(vendas) OVER ()) / NULLIF(MAX(vendas) OVER () - MIN(vendas) OVER (), 0) +
-            (acima_lista - MIN(acima_lista) OVER ()) / NULLIF(MAX(acima_lista) OVER () - MIN(acima_lista) OVER (), 0) +
-            (MAX(novos) OVER () - novos) / NULLIF(MAX(novos) OVER () - MIN(novos) OVER (), 0) +
-            (MAX(estoque) OVER () - estoque) / NULLIF(MAX(estoque) OVER () - MIN(estoque) OVER (), 0) +
-            (infra - MIN(infra) OVER ()) / NULLIF(MAX(infra) OVER () - MIN(infra) OVER (), 0) +
-            (renda - MIN(renda) OVER ()) / NULLIF(MAX(renda) OVER () - MIN(renda) OVER (), 0)
+            (vendas - MIN(vendas) OVER()) / NULLIF(MAX(vendas) OVER()-MIN(vendas) OVER(),0) +
+            (acima  - MIN(acima)  OVER()) / NULLIF(MAX(acima)  OVER()-MIN(acima)  OVER(),0) +
+            (MAX(novos) OVER()-novos) / NULLIF(MAX(novos) OVER()-MIN(novos) OVER(),0) +
+            (MAX(estoque) OVER()-estoque) / NULLIF(MAX(estoque) OVER()-MIN(estoque) OVER(),0) +
+            (infra - MIN(infra) OVER()) / NULLIF(MAX(infra) OVER()-MIN(infra) OVER(),0) +
+            (renda - MIN(renda) OVER()) / NULLIF(MAX(renda) OVER()-MIN(renda) OVER(),0)
         ) / 6
-    )::numeric, 2) AS indice_pressao
+    ::numeric,2) AS indice_pressao
 FROM base
 ORDER BY indice_pressao DESC
 LIMIT 10;
