@@ -1,10 +1,10 @@
--- Table: dw.dim_infra
+/* =========================================================
+   DIM_INF – Dimensão Infraestrutura
+   ========================================================= */
 
--- DROP TABLE IF EXISTS dw.dim_infra;
-
-CREATE TABLE IF NOT EXISTS dw.dim_infra
+CREATE TABLE IF NOT EXISTS dw.dim_inf
 (
-    "SRK_INFRA" bigint NOT NULL,
+    "SRK_INF" bigint NOT NULL,
     "BNK" double precision,
     "BUS" double precision,
     "HSP" double precision,
@@ -14,39 +14,35 @@ CREATE TABLE IF NOT EXISTS dw.dim_infra
     "SCH" double precision,
     "STN" double precision,
     "SUP" double precision,
-    CONSTRAINT pk_dim_infra PRIMARY KEY ("SRK_INFRA")
-)
+    CONSTRAINT pk_dim_inf PRIMARY KEY ("SRK_INF")
+);
 
-TABLESPACE pg_default;
+ALTER TABLE dw.dim_inf OWNER TO postgres;
 
-ALTER TABLE IF EXISTS dw.dim_infra
-    OWNER to postgres;
 
-    -- Table: dw.dim_local
+/* =========================================================
+   DIM_LOC – Dimensão Local
+   ========================================================= */
 
--- DROP TABLE IF EXISTS dw.dim_local;
-
-CREATE TABLE IF NOT EXISTS dw.dim_local
+CREATE TABLE IF NOT EXISTS dw.dim_loc
 (
-    "SRK_LOCAL" bigint NOT NULL,
+    "SRK_LOC" bigint NOT NULL,
     "ZIP" bigint,
-    "CTY" text COLLATE pg_catalog."default",
-    "CTY_FUL" text COLLATE pg_catalog."default",
-    CONSTRAINT pk_dim_local PRIMARY KEY ("SRK_LOCAL")
-)
+    "CTY" text,
+    "CTY_FUL" text,
+    CONSTRAINT pk_dim_loc PRIMARY KEY ("SRK_LOC")
+);
 
-TABLESPACE pg_default;
+ALTER TABLE dw.dim_loc OWNER TO postgres;
 
-ALTER TABLE IF EXISTS dw.dim_local
-    OWNER to postgres;
 
-    -- Table: dw.dim_socio
+/* =========================================================
+   DIM_SOC – Dimensão Socioeconômica
+   ========================================================= */
 
--- DROP TABLE IF EXISTS dw.dim_socio;
-
-CREATE TABLE IF NOT EXISTS dw.dim_socio
+CREATE TABLE IF NOT EXISTS dw.dim_soc
 (
-    "SRK_SOCIO" bigint NOT NULL,
+    "SRK_SOC" bigint NOT NULL,
     "TOT_POP" double precision,
     "MED_AGE" double precision,
     "PER_INC" double precision,
@@ -57,43 +53,40 @@ CREATE TABLE IF NOT EXISTS dw.dim_socio
     "TOT_SCH_AGE" double precision,
     "TOT_SCH_ENR" double precision,
     "MED_COM_TIM" double precision,
-    CONSTRAINT pk_dim_socio PRIMARY KEY ("SRK_SOCIO")
-)
+    CONSTRAINT pk_dim_soc PRIMARY KEY ("SRK_SOC")
+);
 
-TABLESPACE pg_default;
+ALTER TABLE dw.dim_soc OWNER TO postgres;
 
-ALTER TABLE IF EXISTS dw.dim_socio
-    OWNER to postgres;
 
-    -- Table: dw.dim_tempo
+/* =========================================================
+   DIM_TMP – Dimensão Tempo
+   ========================================================= */
 
--- DROP TABLE IF EXISTS dw.dim_tempo;
-
-CREATE TABLE IF NOT EXISTS dw.dim_tempo
+CREATE TABLE IF NOT EXISTS dw.dim_tmp
 (
-    "SRK_TEMPO" bigint NOT NULL,
+    "SRK_TMP" bigint NOT NULL,
     "DAT" timestamp without time zone,
     "YEA" bigint,
     "MON" bigint,
-    "SEA" text COLLATE pg_catalog."default",
-    CONSTRAINT pk_dim_tempo PRIMARY KEY ("SRK_TEMPO")
-)
+    "SEA" text,
+    CONSTRAINT pk_dim_tmp PRIMARY KEY ("SRK_TMP")
+);
 
-TABLESPACE pg_default;
+ALTER TABLE dw.dim_tmp OWNER TO postgres;
 
-ALTER TABLE IF EXISTS dw.dim_tempo
-    OWNER to postgres;
 
-    -- Table: dw.fat_houses
+/* =========================================================
+   FAT_HOU – Tabela Fato Imobiliária
+   ========================================================= */
 
--- DROP TABLE IF EXISTS dw.fat_houses;
-
-CREATE TABLE IF NOT EXISTS dw.fat_houses
+CREATE TABLE IF NOT EXISTS dw.fat_hou
 (
-    "SRK_TEMPO" bigint,
-    "SRK_LOCAL" bigint,
-    "SRK_INFRA" bigint,
-    "SRK_SOCIO" bigint,
+    "SRK_TMP" bigint,
+    "SRK_LOC" bigint,
+    "SRK_INF" bigint,
+    "SRK_SOC" bigint,
+
     "MED_SAL_PRC" double precision,
     "MED_LST_PRC" double precision,
     "AVG_PRC" double precision,
@@ -101,6 +94,7 @@ CREATE TABLE IF NOT EXISTS dw.fat_houses
     "MED_LST_PSF" double precision,
     "MED_RNT" double precision,
     "MED_HOM_VAL" double precision,
+
     "HOM_SOL" double precision,
     "PEN_SAL" double precision,
     "NEW_LST" double precision,
@@ -109,61 +103,35 @@ CREATE TABLE IF NOT EXISTS dw.fat_houses
     "AVG_SAL_LST" double precision,
     "SOL_ABV_LST" double precision,
     "OFF_MKT_TWK" double precision,
-    CONSTRAINT fk_fato_infra FOREIGN KEY ("SRK_INFRA")
-        REFERENCES dw.dim_infra ("SRK_INFRA") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_fato_local FOREIGN KEY ("SRK_LOCAL")
-        REFERENCES dw.dim_local ("SRK_LOCAL") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_fato_socio FOREIGN KEY ("SRK_SOCIO")
-        REFERENCES dw.dim_socio ("SRK_SOCIO") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_fato_tempo FOREIGN KEY ("SRK_TEMPO")
-        REFERENCES dw.dim_tempo ("SRK_TEMPO") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
 
-TABLESPACE pg_default;
+    CONSTRAINT fk_fat_tmp FOREIGN KEY ("SRK_TMP")
+        REFERENCES dw.dim_tmp ("SRK_TMP"),
 
-ALTER TABLE IF EXISTS dw.fat_houses
-    OWNER to postgres;
--- Index: idx_fato_srk_infra
+    CONSTRAINT fk_fat_loc FOREIGN KEY ("SRK_LOC")
+        REFERENCES dw.dim_loc ("SRK_LOC"),
 
--- DROP INDEX IF EXISTS dw.idx_fato_srk_infra;
+    CONSTRAINT fk_fat_inf FOREIGN KEY ("SRK_INF")
+        REFERENCES dw.dim_inf ("SRK_INF"),
 
-CREATE INDEX IF NOT EXISTS idx_fato_srk_infra
-    ON dw.fat_houses USING btree
-    ("SRK_INFRA" ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
--- Index: idx_fato_srk_local
+    CONSTRAINT fk_fat_soc FOREIGN KEY ("SRK_SOC")
+        REFERENCES dw.dim_soc ("SRK_SOC")
+);
 
--- DROP INDEX IF EXISTS dw.idx_fato_srk_local;
+ALTER TABLE dw.fat_hou OWNER TO postgres;
 
-CREATE INDEX IF NOT EXISTS idx_fato_srk_local
-    ON dw.fat_houses USING btree
-    ("SRK_LOCAL" ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
--- Index: idx_fato_srk_socio
 
--- DROP INDEX IF EXISTS dw.idx_fato_srk_socio;
+/* =========================================================
+   Índices – Otimização de JOINs
+   ========================================================= */
 
-CREATE INDEX IF NOT EXISTS idx_fato_srk_socio
-    ON dw.fat_houses USING btree
-    ("SRK_SOCIO" ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
--- Index: idx_fato_srk_tempo
+CREATE INDEX IF NOT EXISTS idx_fat_hou_srk_tmp
+    ON dw.fat_hou ("SRK_TMP");
 
--- DROP INDEX IF EXISTS dw.idx_fato_srk_tempo;
+CREATE INDEX IF NOT EXISTS idx_fat_hou_srk_loc
+    ON dw.fat_hou ("SRK_LOC");
 
-CREATE INDEX IF NOT EXISTS idx_fato_srk_tempo
-    ON dw.fat_houses USING btree
-    ("SRK_TEMPO" ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_fat_hou_srk_inf
+    ON dw.fat_hou ("SRK_INF");
+
+CREATE INDEX IF NOT EXISTS idx_fat_hou_srk_soc
+    ON dw.fat_hou ("SRK_SOC");
