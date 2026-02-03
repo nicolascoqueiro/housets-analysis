@@ -4,3 +4,5 @@ matplotlib
 seaborn
 scikit-learn
 notebook
+sqlalchemy
+psycopg2
