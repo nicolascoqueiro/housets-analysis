@@ -6,9 +6,12 @@ O projeto cobre desde a ingestão de dados brutos até a **modelagem dimensional
 🔗 **Base de dados utilizada:**  
 https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
+🔗 **Dashboard Power BI (publicado):**  
+https://app.powerbi.com/links/kBHH3nr9-3?ctid=ec359ba1-630b-4d2b-b833-c8e6d48f8059&pbi_source=linkShare
+
 ---
 
-## 🎯 Objetivos do Projeto
+## Objetivos do Projeto
 
 - Implementar um pipeline de dados estruturado seguindo boas práticas de engenharia de dados  
 - Aplicar a arquitetura de medalhão em um contexto analítico real  
@@ -19,7 +22,7 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
 ---
 
-## 📁 Estrutura de Pastas do Projeto
+## Estrutura de Pastas do Projeto
 ```
 .
 ├── data_layer
@@ -51,11 +54,11 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
 ---
 
-## 🏅 Arquitetura de Dados (Medalhão)
+## Arquitetura de Dados (Medalhão)
 
 O projeto segue uma **arquitetura de medalhão adaptada**, adequada para projetos analíticos de pequeno e médio porte.
 
-### 🔹 Raw (Bronze)
+### Raw (Bronze)
 - Dados brutos carregados diretamente do arquivo CSV  
 - Nenhuma transformação aplicada  
 - Preserva o dado original para auditoria e rastreabilidade  
@@ -63,7 +66,7 @@ O projeto segue uma **arquitetura de medalhão adaptada**, adequada para projeto
 
 ---
 
-### 🔸 Silver
+### Silver
 - Dados limpos, padronizados e tipados  
 - Padronização de nomes de colunas  
 - Conversão de tipos de dados  
@@ -74,7 +77,7 @@ O projeto segue uma **arquitetura de medalhão adaptada**, adequada para projeto
 
 ---
 
-### ⭐ Gold
+### Gold
 - Modelagem dimensional (Data Warehouse)  
 - Separação em **tabelas dimensão** e **tabela fato**  
 - Uso de **chaves substitutas (SRK)**  
@@ -84,7 +87,7 @@ O projeto segue uma **arquitetura de medalhão adaptada**, adequada para projeto
 
 ---
 
-## 🔄 Pipeline ETL
+## Pipeline ETL
 
 ### Raw → Silver
 
@@ -123,22 +126,22 @@ transformer/etl_silver_to_gold.ipynb
 
 ---
 
-## 📐 Modelagem Dimensional
+## Modelagem Dimensional
 
 O Data Warehouse segue o **modelo estrela**.
 
 ### Dimensões
-- `dim_tempo`  
-- `dim_local`  
-- `dim_socio`  
-- `dim_infra`  
+- `dim_tmp`  
+- `dim_lcl`  
+- `dim_soc`  
+- `dim_inf`  
 
 Cada dimensão possui:
 - Chave primária substituta (**SRK**)  
 - Atributos descritivos padronizados  
 
 ### Tabela Fato
-- `fat_houses`  
+- `fat_hou`  
 - Métricas do mercado imobiliário  
 - Relacionamento com todas as dimensões  
 
@@ -146,16 +149,16 @@ Diagramas **MER, DER e DLD** estão disponíveis nas pastas das camadas **silver
 
 ---
 
-## 📊 Análises Exploratórias e Analíticas
+## Análises Exploratórias e Analíticas
 
-### 🔍 Análises Exploratórias (EDA)
+### Análises Exploratórias (EDA)
 - Distribuição dos preços dos imóveis  
 - Distribuição da renda per capita  
 - Relação renda × preço dos imóveis  
 - Análise de liquidez do mercado  
 - Análises temporais e sazonais  
 
-### 📈 Análises Analíticas (Gold)
+### Análises Analíticas (Gold)
 - Ranking de cidades mais caras e mais baratas  
 - Análise de custo-benefício de infraestrutura  
 - Índices normalizados (0–100)  
@@ -165,18 +168,74 @@ Diagramas **MER, DER e DLD** estão disponíveis nas pastas das camadas **silver
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Dashboards e Análises (Power BI)
 
-- **Linguagem:** Python  
-- **Banco de Dados:** PostgreSQL  
-- **Containerização:** Docker / Docker Compose  
-- **Bibliotecas:** Pandas, NumPy, SQLAlchemy, Matplotlib, Seaborn  
-- **Ambiente de Análise:** Jupyter Notebook  
-- **BI:** Power BI (planejado)  
+Os dashboards foram organizados para contar uma **história analítica progressiva**:
+
+### Panorama do Mercado
+- Preço médio dos imóveis  
+- Volume de vendas  
+- Percentual de imóveis vendidos acima do preço  
+- Cidades mais caras e mais acessíveis  
+- Pressão do mercado imobiliário  
+
+### Infraestrutura e Perfil Econômico
+- Índice de custo-benefício urbano  
+- Renda média por cidade  
+- Infraestrutura urbana  
+- Índice de eficiência urbana  
+
+### Dinâmica Temporal
+- Evolução dos preços ao longo do tempo  
+- Evolução da infraestrutura  
+- Análise de sazonalidade (Nova Iorque)  
+
+Essas análises permitem compreender não apenas *quanto* custam os imóveis, mas *por que* eles custam esse valor e *como* o mercado se comporta ao longo do tempo.
 
 ---
 
-## 🚀 Próximos Passos
+## Tecnologias Utilizadas
 
-- Integração do Data Warehouse com Power BI  
-- Criação de dashboards analíticos
+- **Linguagem:** Python  
+- **Banco de Dados:** PostgreSQL  
+- **ETL / Análise:** Pandas, NumPy  
+- **Visualização:** Power BI  
+- **Ambiente:** Jupyter Notebook  
+- **Containerização:** Docker / Docker Compose  
+
+
+---
+
+## Conclusão
+
+Este projeto demonstra a aplicação prática de conceitos de **engenharia de dados**, **Data Warehouse** e **Business Intelligence**, transformando dados públicos em insights estratégicos sobre o mercado imobiliário dos Estados Unidos.
+
+A abordagem adotada permite análises robustas, escaláveis e facilmente integráveis a ferramentas de visualização, oferecendo suporte qualificado à tomada de decisão.
+
+---
+
+## Como rodar o projeto?
+
+Inicie o banco de dados PostgreSQL utilizando Docker Compose:
+
+```bash
+docker compose up -d
+```
+---
+
+## Instale as dependências
+
+pip install -r requirements.txt
+
+---
+## Ordem dos procedimentos
+
+Execute os notebooks na ordem abaixo.
+
+1. data_layer/raw/analytics.ipynb
+
+2. transformer/etl_raw_to_silver.ipynb
+
+3. data_layer/silver/analytics.ipynb
+
+4. transformer/etl_silver_to_gold.ipynb
