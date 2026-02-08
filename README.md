@@ -10,10 +10,10 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
 ## Dashboard
 
-![Primeiro Painel](Screenshots/1)
-![Segundo Painel](Screenshots/2)
-![Terceiro Painel](Screenshots/3)
-![Quarto Painel](Screenshots/4)
+![Primeiro Painel](Screenshots/1.png)
+![Segundo Painel](Screenshots/2.png)
+![Terceiro Painel](Screenshots/3.png)
+![Quarto Painel](Screenshots/4.png)
 
 🔗 **Dashboard Power BI (publicado):**  
 https://app.powerbi.com/links/kBHH3nr9-3?ctid=ec359ba1-630b-4d2b-b833-c8e6d48f8059&pbi_source=linkShare
