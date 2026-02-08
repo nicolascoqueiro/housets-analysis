@@ -1,10 +1,19 @@
-# 🏠 Projeto: Análise do Mercado Imobiliário com Arquitetura de Medalhão
+# Análise do Mercado Imobiliário com Arquitetura de Medalhão
 
 Este repositório apresenta um projeto completo de **engenharia e análise de dados** aplicado ao mercado imobiliário, utilizando uma base pública do Kaggle.  
 O projeto cobre desde a ingestão de dados brutos até a **modelagem dimensional (Data Warehouse)** e a criação de **consultas analíticas avançadas**, seguindo uma **arquitetura de dados em medalhão (Raw → Silver → Gold)**.
 
 🔗 **Base de dados utilizada:**  
 https://www.kaggle.com/datasets/shengkunwang/housets-dataset
+
+---
+
+## Dashboard
+
+![Primeiro Painel](Screenshots/1)
+![Segundo Painel](Screenshots/2)
+![Terceiro Painel](Screenshots/3)
+![Quarto Painel](Screenshots/4)
 
 🔗 **Dashboard Power BI (publicado):**  
 https://app.powerbi.com/links/kBHH3nr9-3?ctid=ec359ba1-630b-4d2b-b833-c8e6d48f8059&pbi_source=linkShare
@@ -221,13 +230,11 @@ Inicie o banco de dados PostgreSQL utilizando Docker Compose:
 ```bash
 docker compose up -d
 ```
----
 
 ## Instale as dependências
 
 pip install -r requirements.txt
 
----
 ## Ordem dos procedimentos
 
 Execute os notebooks na ordem abaixo.
