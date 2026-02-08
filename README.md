@@ -10,7 +10,7 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
 ## Dashboard
 
-![Primeiro Painel](Screenshots/1.jpg)
+![Primeiro Painel](Screenshots/1.png)
 ![Segundo Painel](Screenshots/2.jpg)
 ![Terceiro Painel](Screenshots/3.jpg)
 ![Quarto Painel](Screenshots/4.jpg)
