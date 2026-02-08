@@ -10,10 +10,10 @@ https://www.kaggle.com/datasets/shengkunwang/housets-dataset
 
 ## Dashboard
 
-![Primeiro Painel](Screenshots/1.png)
-![Segundo Painel](Screenshots/2.png)
-![Terceiro Painel](Screenshots/3.png)
-![Quarto Painel](Screenshots/4.png)
+![Primeiro Painel](Screenshots/1.jpg)
+![Segundo Painel](Screenshots/2.jpg)
+![Terceiro Painel](Screenshots/3.jpg)
+![Quarto Painel](Screenshots/4.jpg)
 
 🔗 **Dashboard Power BI (publicado):**  
 https://app.powerbi.com/links/kBHH3nr9-3?ctid=ec359ba1-630b-4d2b-b833-c8e6d48f8059&pbi_source=linkShare
@@ -54,6 +54,12 @@ https://app.powerbi.com/links/kBHH3nr9-3?ctid=ec359ba1-630b-4d2b-b833-c8e6d48f80
 ├── transformer
 │ ├── raw_to_silver.py
 │ └── silver_to_gold.py
+│
+├── Screenshots
+│ ├── 1.jpg
+│ ├── 2.jpg
+│ ├── 3.jpg
+│ └── 4.jpg
 │
 ├── docker-compose.yml
 ├── requirements.txt
